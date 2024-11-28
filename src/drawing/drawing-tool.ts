@@ -1,9 +1,11 @@
 import {
+    Coordinate,
     IChartApi,
     ISeriesApi,
     Logical,
     MouseEventParams,
     SeriesType,
+    Time,
 } from 'lightweight-charts';
 import { Drawing } from './drawing';
 import { HorizontalLine } from '../horizontal-line/horizontal-line';
@@ -26,6 +28,13 @@ export class DrawingTool {
 
         this._chart.subscribeClick(this._clickHandler);
         this._chart.subscribeCrosshairMove(this._moveHandler);
+
+        // Add keyboard event listener for delete key
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.key === 'Delete' && Drawing.hoveredObject) {
+                this.delete(Drawing.hoveredObject);
+            }
+        });
     }
 
     private _clickHandler = (param: MouseEventParams) => this._onClick(param);
@@ -54,13 +63,45 @@ export class DrawingTool {
         if (d == null) return;
         const idx = this._drawings.indexOf(d);
         if (idx == -1) return;
-        this._drawings.splice(idx, 1)
+
+        // First detach the drawing to prevent any further interactions
         d.detach();
+
+        // Then remove it from our array
+        this._drawings.splice(idx, 1);
+
+        // Delete drawing from chart
+        this._series.detachPrimitive(d);
     }
 
     clearDrawings() {
         for (const d of this._drawings) d.detach();
         this._drawings = [];
+    }
+
+    simulateClick(event: MouseEvent) {
+        if (!this._isDrawing) return;
+        const rect = this._chart.timeScale().getVisibleLogicalRange();
+        if (!rect) return;
+
+        // Get chart container's bounding rect
+        const chartContainer = (this._chart as any).chartElement();
+        const containerRect = chartContainer.getBoundingClientRect();
+
+        // Convert screen coordinates to chart-relative coordinates
+        const x = event.clientX - containerRect.left;
+        const y = event.clientY - containerRect.top;
+
+        const param: MouseEventParams = {
+            time: this._chart.timeScale().coordinateToTime(x) as Time | undefined,
+            logical: this._chart.timeScale().coordinateToLogical(x) as Logical,
+            point: {
+                x: x as Coordinate,
+                y: y as Coordinate,
+            },
+            hoveredObjectId: undefined,
+        } as MouseEventParams;
+        this._clickHandler(param);
     }
 
     repositionOnTime() {
@@ -110,13 +151,18 @@ export class DrawingTool {
     private _onMouseMove(param: MouseEventParams) {
         if (!param) return;
 
-        for (const t of this._drawings) t._handleHoverInteraction(param);
+        // Only process hover interactions for drawings that are still attached
+        for (const t of this._drawings) {
+            if (t.series) { // Check if drawing is still attached
+                t._handleHoverInteraction(param);
+            }
+        }
 
         if (!this._isDrawing || !this._activeDrawing) return;
 
         const point = Drawing._eventToPoint(param, this._series);
         if (!point) return;
         this._activeDrawing.updatePoints(null, point);
-        // this._activeDrawing.setSecondPoint(point);
     }
+
 }

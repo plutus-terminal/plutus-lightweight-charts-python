@@ -10,5 +10,5 @@ export interface DrawingOptions {
 export const defaultOptions: DrawingOptions = {
     lineColor: '#1E80F0',
     lineStyle: LineStyle.Solid,
-    width: 4,
+    width: 2,
 };

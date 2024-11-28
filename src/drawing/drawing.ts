@@ -25,7 +25,7 @@ export abstract class Drawing extends PluginBase {
     _options: DrawingOptions;
 
     abstract _type: string;
-    protected _points: (Point|null)[] = [];
+    protected _points: (Point | null)[] = [];
 
     protected _state: InteractionState = InteractionState.NONE;
 
@@ -66,7 +66,7 @@ export abstract class Drawing extends PluginBase {
     }
 
     public updatePoints(...points: (Point | null)[]) {
-        for (let i=0; i<this.points.length; i++) {
+        for (let i = 0; i < this.points.length; i++) {
             if (points[i] == null) continue;
             this.points[i] = points[i] as Point;
         }
@@ -74,13 +74,30 @@ export abstract class Drawing extends PluginBase {
     }
 
     detach() {
+        // Clear hover states if this drawing is being detached
+        if (Drawing.hoveredObject === this) {
+            Drawing.hoveredObject = null;
+        }
+        if (Drawing.lastHoveredObject === this) {
+            Drawing.lastHoveredObject = null;
+        }
+
+        // Reset state to NONE
+        this._state = InteractionState.NONE;
+        document.body.style.cursor = "default";
+
+        // Make drawing invisible
         this._options.lineColor = 'transparent';
         this.requestUpdate();
+
+        // Detach from series
         this.series.detachPrimitive(this);
+
+        // Remove all event listeners
         for (const s of this._listeners) {
             document.body.removeEventListener(s.name, s.listener);
         }
-
+        this._listeners = [];
     }
 
     get points() {
@@ -89,7 +106,7 @@ export abstract class Drawing extends PluginBase {
 
     protected _subscribe(name: keyof DocumentEventMap, listener: any) {
         document.body.addEventListener(name, listener);
-        this._listeners.push({name: name, listener: listener});
+        this._listeners.push({ name: name, listener: listener });
     }
 
     protected _unsubscribe(name: keyof DocumentEventMap, callback: any) {
@@ -129,8 +146,8 @@ export abstract class Drawing extends PluginBase {
 
     protected static _getDiff(p1: Point, p2: Point): DiffPoint {
         const diff: DiffPoint = {
-            logical: p1.logical-p2.logical,
-            price: p1.price-p2.price,
+            logical: p1.logical - p2.logical,
+            price: p1.price - p2.price,
         }
         return diff;
     }
@@ -138,7 +155,7 @@ export abstract class Drawing extends PluginBase {
     protected _addDiffToPoint(point: Point | null, logicalDiff: number, priceDiff: number) {
         if (!point) return;
         point.logical = point.logical + logicalDiff as Logical;
-        point.price = point.price+priceDiff;
+        point.price = point.price + priceDiff;
         point.time = this.series.dataByIndex(point.logical)?.time || null;
     }
 
