@@ -53,8 +53,7 @@ export abstract class TwoPointDrawingPaneRenderer extends DrawingPaneRenderer {
     //  scope.context.fillText(text, x + offset * 2 - leftAdjustment, y);
     // }
 
-    _drawEndCircle(scope: BitmapCoordinatesRenderingScope, x: number, y: number) {
-        const radius = 9
+    _drawEndCircle(scope: BitmapCoordinatesRenderingScope, x: number, y: number, radius: number = 9) {
         scope.context.fillStyle = '#000';
         scope.context.beginPath();
         scope.context.arc(x, y, radius, 0, 2 * Math.PI);
