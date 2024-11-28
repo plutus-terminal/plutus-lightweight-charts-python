@@ -49,6 +49,9 @@ body {
 .toolbox-button:active {
 	background-color: rgba(90, 106, 104, 0.7);
 }
+.toolbox-button.hidden {
+	display: none;
+}
 
 .active-toolbox-button {
 	background-color: var(--active-bg-color) !important;

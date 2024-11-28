@@ -12,7 +12,7 @@ export function camelToTitle(inputString: string) {
         if (result.length == 0) {
             result.push(c.toUpperCase());
         } else if (c == c.toUpperCase()) {
-            result.push(' '+c);
+            result.push(' ' + c);
         } else result.push(c);
     }
     return result.join('');
@@ -62,23 +62,25 @@ export class ContextMenu {
         }
         this.items = [];
 
-        for (const optionName of Object.keys(Drawing.hoveredObject._options)) {
-            let subMenu;
-            if (optionName.toLowerCase().includes('color')) {
-                subMenu = new ColorPicker(this.saveDrawings, optionName as keyof DrawingOptions);
-            } else if (optionName === 'lineStyle') {
-                subMenu = new StylePicker(this.saveDrawings)
-            } else continue;
+        if (Drawing.hoveredObject._type !== 'Measure') {
+            for (const optionName of Object.keys(Drawing.hoveredObject._options)) {
+                let subMenu;
+                if (optionName.toLowerCase().includes('color')) {
+                    subMenu = new ColorPicker(this.saveDrawings, optionName as keyof DrawingOptions);
+                } else if (optionName === 'lineStyle') {
+                    subMenu = new StylePicker(this.saveDrawings)
+                } else continue;
 
-            let onClick = (rect: DOMRect) => subMenu.openMenu(rect)
-            this.menuItem(camelToTitle(optionName), onClick, () => {
-                document.removeEventListener('click', subMenu.closeMenu)
-                subMenu._div.style.display = 'none'
-            })
+                let onClick = (rect: DOMRect) => subMenu.openMenu(rect)
+                this.menuItem(camelToTitle(optionName), onClick, () => {
+                    document.removeEventListener('click', subMenu.closeMenu)
+                    subMenu._div.style.display = 'none'
+                })
+            }
+            this.separator()
         }
 
         let onClickDelete = () => this.drawingTool.delete(Drawing.lastHoveredObject);
-        this.separator()
         this.menuItem('Delete Drawing', onClickDelete)
 
         // const colorPicker = new ColorPicker(this.saveDrawings)
@@ -127,9 +129,9 @@ export class ContextMenu {
 
         item.addEventListener('mouseover', () => {
             if (this.hoverItem && this.hoverItem.closeAction) this.hoverItem.closeAction()
-            this.hoverItem = {elem: elem, action: action, closeAction: hover}
+            this.hoverItem = { elem: elem, action: action, closeAction: hover }
         })
-        if (!hover) item.addEventListener('click', (event) => {action(event); this.div.style.display = 'none'})
+        if (!hover) item.addEventListener('click', (event) => { action(event); this.div.style.display = 'none' })
         else {
             let timeout: number;
             item.addEventListener('mouseover', () => timeout = setTimeout(() => action(item.getBoundingClientRect()), 100))
