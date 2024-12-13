@@ -65,9 +65,9 @@ class ToolBox:
         self.run_script(f"{self.id}.toolBox.hideButton('{tool.value}')")
 
     def clear_drawings(self):
-        """Clear all drawings made on the chart.
-
-        Args:
-            tool (Tools): Tool to hide
-        """
+        """Clear all drawings made on the chart."""
         self.run_script(f"{self.id}.toolBox.clearDrawings()")
+
+    def reposition_on_time(self):
+        """Reposition all drawings made on the chart."""
+        self.run_script(f"{self.id}.toolBox.repositionOnTime()")

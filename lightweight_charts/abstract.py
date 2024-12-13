@@ -656,13 +656,12 @@ class Candlestick(SeriesCommon):
             if (!{self.id}.chart.priceScale("right").options.autoScale)
                 {self.id}.chart.priceScale("right").applyOptions({{autoScale: true}})
         """)
-        # TODO keep drawings doesn't work consistenly w
-        if keep_drawings:
-            self.run_script(
-                f"{self._chart.id}.toolBox?._drawingTool.repositionOnTime()"
-            )
-        else:
-            self.run_script(f"{self._chart.id}.toolBox?.clearDrawings()")
+
+        self.run_script(f"""
+        if ({self.id}.toolBox) {{
+            {self.id}.toolBox.{('clearDrawings()' if not keep_drawings else '_drawingTool.repositionOnTime()')}
+        }}
+        """)
 
     def update(self, series: pd.Series, _from_tick=False):
         """
