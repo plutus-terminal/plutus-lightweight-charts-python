@@ -63,3 +63,11 @@ class ToolBox:
             tool (Tools): Tool to hide
         """
         self.run_script(f"{self.id}.toolBox.hideButton('{tool.value}')")
+
+    def clear_drawings(self):
+        """Clear all drawings made on the chart.
+
+        Args:
+            tool (Tools): Tool to hide
+        """
+        self.run_script(f"{self.id}.toolBox.clearDrawings()")
