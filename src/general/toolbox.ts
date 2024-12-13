@@ -203,6 +203,10 @@ export class ToolBox {
         this._drawingTool.clearDrawings();
     }
 
+    repositionOnTime() {
+        this._drawingTool.repositionOnTime();
+    }
+
     saveDrawings = () => {
         const drawingMeta = []
         for (const d of this._drawingTool.drawings) {
