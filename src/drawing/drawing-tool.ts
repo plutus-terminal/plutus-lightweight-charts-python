@@ -112,16 +112,26 @@ export class DrawingTool {
                     newPoints.push(point);
                     continue;
                 }
-                const logical = point.time ? this._chart.timeScale()
-                    .coordinateToLogical(
-                        this._chart.timeScale().timeToCoordinate(point.time) || 0
-                    ) : point.logical;
+
+                let logical: Logical | undefined;
+                let timeCoordinate: Coordinate | undefined;
+
+                if (point.time) {
+                    timeCoordinate = this._chart.timeScale().timeToCoordinate(point.time) ?? undefined;
+                    logical = this._chart.timeScale().coordinateToLogical(timeCoordinate ?? NaN) ?? undefined;
+                } else if (point.logical !== undefined) {
+                    timeCoordinate = this._chart.timeScale().logicalToCoordinate(point.logical) ?? undefined;
+                    logical = point.logical;
+                }
+
                 newPoints.push({
                     time: point.time,
-                    logical: logical as Logical,
+                    logical: logical ?? point.logical,
                     price: point.price,
+                    x: timeCoordinate,
                 })
             }
+
             drawing.updatePoints(...newPoints);
         }
     }
