@@ -72,6 +72,8 @@ export class DrawingTool {
 
         // Delete drawing from chart
         this._series.detachPrimitive(d);
+        if (!this._finishDrawingCallback) return;
+        this._finishDrawingCallback();
     }
 
     clearDrawings() {
@@ -168,11 +170,16 @@ export class DrawingTool {
             }
         }
 
-        if (!this._isDrawing || !this._activeDrawing) return;
+        if (!this._isDrawing || !this._activeDrawing) {
+            return;
+        }
 
         const point = Drawing._eventToPoint(param, this._series);
         if (!point) return;
         this._activeDrawing.updatePoints(null, point);
+
+        if (!this._finishDrawingCallback) return;
+        this._finishDrawingCallback();
     }
 
 }
