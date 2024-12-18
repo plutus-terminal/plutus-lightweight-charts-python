@@ -622,11 +622,10 @@ class Candlestick(SeriesCommon):
 
         # self.run_script(f'{self.id}.makeCandlestickSeries()')
 
-    def set(self, df: Optional[pd.DataFrame] = None, keep_drawings=False):
+    def set(self, df: Optional[pd.DataFrame] = None):
         """
         Sets the initial data for the chart.\n
         :param df: columns: date/time, open, high, low, close, volume (if volume enabled).
-        :param keep_drawings: keeps any drawings made through the toolbox. Otherwise, they will be deleted.
         """
         if df is None or df.empty:
             self.run_script(f"{self.id}.series.setData([])")
@@ -655,12 +654,6 @@ class Candlestick(SeriesCommon):
         self.run_script(f"""
             if (!{self.id}.chart.priceScale("right").options.autoScale)
                 {self.id}.chart.priceScale("right").applyOptions({{autoScale: true}})
-        """)
-
-        self.run_script(f"""
-        if ({self.id}.toolBox) {{
-            {self.id}.toolBox.{('clearDrawings()' if not keep_drawings else '_drawingTool.repositionOnTime()')}
-        }}
         """)
 
     def update(self, series: pd.Series, _from_tick=False):
@@ -828,7 +821,18 @@ class AbstractChart(Candlestick, Pane):
 
         self.topbar: TopBar = TopBar(self)
         if toolbox:
-            self.toolbox: ToolBox = ToolBox(self)
+            self.toolbox: Optional[ToolBox] = ToolBox(self)
+        else:
+            self.toolbox = None
+
+    def set(self, df: Optional[pd.DataFrame] = None, keep_drawings=False):
+        super().set(df)
+        if self.toolbox is None:
+            return
+        if keep_drawings:
+            self.toolbox.reposition_on_time()
+        else:
+            self.toolbox.clear_drawings()
 
     def fit(self):
         """
@@ -891,6 +895,12 @@ class AbstractChart(Candlestick, Pane):
             to: {pd.to_datetime(end_time).timestamp()}
         }})
         """)
+
+    def get_visible_range(self):
+        """Retrieves the visible range of the chart."""
+        return self.win.run_script_and_get(
+            f"{self.id}.chart.timeScale().getVisibleRange()"
+        )
 
     def resize(self, width: Optional[float] = None, height: Optional[float] = None):
         """

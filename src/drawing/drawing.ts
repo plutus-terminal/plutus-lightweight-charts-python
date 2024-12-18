@@ -20,6 +20,12 @@ export enum InteractionState {
     DRAGGINGP4,
 }
 
+export enum InteractionType {
+    NONE,
+    HOVER,
+    DRAG,
+}
+
 export abstract class Drawing extends PluginBase {
     _paneViews: DrawingPaneView[] = [];
     _options: DrawingOptions;
@@ -120,15 +126,18 @@ export abstract class Drawing extends PluginBase {
         this._latestHoverPoint = param.point;
         if (Drawing._mouseIsDown) {
             this._handleDragInteraction(param);
+            return InteractionType.DRAG;
         } else {
             if (this._mouseIsOverDrawing(param)) {
                 if (this._state != InteractionState.NONE) return;
                 this._moveToState(InteractionState.HOVERING);
                 Drawing.hoveredObject = Drawing.lastHoveredObject = this;
+                return InteractionType.HOVER;
             } else {
                 if (this._state == InteractionState.NONE) return;
                 this._moveToState(InteractionState.NONE);
                 if (Drawing.hoveredObject === this) Drawing.hoveredObject = null;
+                return InteractionType.NONE;
             }
         }
     }

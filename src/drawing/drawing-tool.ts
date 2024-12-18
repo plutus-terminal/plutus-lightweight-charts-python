@@ -7,7 +7,7 @@ import {
     SeriesType,
     Time,
 } from 'lightweight-charts';
-import { Drawing } from './drawing';
+import { Drawing, InteractionType } from './drawing';
 import { HorizontalLine } from '../horizontal-line/horizontal-line';
 
 
@@ -72,6 +72,8 @@ export class DrawingTool {
 
         // Delete drawing from chart
         this._series.detachPrimitive(d);
+        if (!this._finishDrawingCallback) return;
+        this._finishDrawingCallback();
     }
 
     clearDrawings() {
@@ -161,14 +163,27 @@ export class DrawingTool {
     private _onMouseMove(param: MouseEventParams) {
         if (!param) return;
 
+        let drawingDragged = false;
+
         // Only process hover interactions for drawings that are still attached
-        for (const t of this._drawings) {
-            if (t.series) { // Check if drawing is still attached
-                t._handleHoverInteraction(param);
+        for (const drawing of this._drawings) {
+            if (drawing.series) { // Check if drawing is still attached
+                const interactionType = drawing._handleHoverInteraction(param);
+
+                if (interactionType === InteractionType.DRAG) {
+                    drawingDragged = true;
+                }
             }
         }
 
-        if (!this._isDrawing || !this._activeDrawing) return;
+        // Trigger save if a drawing is being dragged
+        if (!this._isDrawing && drawingDragged && this._finishDrawingCallback) {
+            this._finishDrawingCallback();
+        }
+
+        if (!this._isDrawing || !this._activeDrawing) {
+            return;
+        }
 
         const point = Drawing._eventToPoint(param, this._series);
         if (!point) return;
