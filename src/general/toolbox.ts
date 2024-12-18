@@ -225,6 +225,7 @@ export class ToolBox {
             switch (d.type) {
                 case "Measure":
                     this._drawingTool.addNewDrawing(new Measure(d.points[0], d.points[1], d.options));
+                    break;
                 case "Box":
                     this._drawingTool.addNewDrawing(new Box(d.points[0], d.points[1], d.options));
                     break;
