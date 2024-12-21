@@ -12,6 +12,9 @@
 lightweight-charts-python aims to provide a simple and pythonic way to access and implement [TradingView's Lightweight Charts](https://www.tradingview.com/lightweight-charts/).
 </div>
 
+> :warning: **This package is a fork of the original [lightweight-charts-python](https://github.com/louisnw01/lightweight-charts-python) package. With specific enhacements needed for the 
+[Plutus-Terminal](https://github.com/plutus-terminal/plutus-terminal) project, please refer to the original package for more information.**
+
 
 ## Installation
 ```
